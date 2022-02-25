@@ -1,6 +1,6 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
-  "pluginType": "platform",
+  "pluginAlias": "UnifiFirewall",
+  "pluginType": "accessory",
   "singular": true,
   "schema": {
     "type": "object",
@@ -9,7 +9,61 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Guest Wifi"
+      },
+      "controller": {
+        "type": "object",
+        "title": "Controller",
+        "properties": {
+          "host": {
+            "title": "Host",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          "url": {
+            "title": "URL",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          "username": {
+            "title": "Username",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          "password": {
+            "title": "Password",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          "strictSSL": {
+            "title": "Strict SSL?",
+            "type": "boolean",
+            "required": true,
+            "default": false
+          }
+        }
+      },
+      "site": {
+        "type": "string",
+        "title": "Site ID",
+        "required": true,
+        "default": ""
+      },
+      "rule": {
+        "type": "string",
+        "title": "Rule ID",
+        "required": true,
+        "default": ""
+      },
+      "inverted": {
+        "type": "boolean",
+        "title": "Inverted (enable rule when switched off)",
+        "required": true,
+        "default": true
       }
     }
   }
