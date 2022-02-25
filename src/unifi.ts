@@ -46,10 +46,7 @@ export class UnifiFirewallRule {
     if (this.controller.logged) {
       return;
     }
-    try {
-      await this.controller.login();
-    } catch (error) {
-      console.log(error);
-    }
+
+    await this.controller.login();
   }
 }
