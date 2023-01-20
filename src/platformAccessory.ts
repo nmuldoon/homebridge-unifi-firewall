@@ -15,6 +15,7 @@ export class UnifiFirewallSwitch {
     private readonly fwRule: FWRule
   ) {
     // set accessory information
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, "Ubiquiti")
