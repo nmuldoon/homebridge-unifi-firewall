@@ -1,11 +1,9 @@
-import { API } from 'homebridge';
-
-import { ACCESSORY_NAME } from './settings';
-import { UnifiFirewallSwitch } from './accessory';
+import { PLATFORM_NAME } from "./settings";
+import { UnifiFirewallPlatform } from "./platform";
 
 /**
  * This method registers the platform with Homebridge
  */
-export = (api: API) => {
-  api.registerAccessory(ACCESSORY_NAME, UnifiFirewallSwitch);
+export = (homebridge: any) => {
+  homebridge.registerPlatform(PLATFORM_NAME, UnifiFirewallPlatform);
 };

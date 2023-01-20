@@ -1,69 +1,68 @@
 {
   "pluginAlias": "UnifiFirewall",
-  "pluginType": "accessory",
+  "pluginType": "platform",
   "singular": true,
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Guest Wifi"
-      },
-      "controller": {
+      "unifi": {
         "type": "object",
-        "title": "Controller",
+        "title": "Unifi Controller Settings",
         "properties": {
-          "host": {
-            "title": "Host",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
           "url": {
-            "title": "URL",
+            "title": "Controller URL",
             "type": "string",
-            "required": true,
-            "default": ""
+            "required": true
           },
           "username": {
             "title": "Username",
             "type": "string",
-            "required": true,
-            "default": ""
+            "required": true
           },
           "password": {
             "title": "Password",
             "type": "string",
-            "required": true,
-            "default": ""
+            "required": true
+          },
+          "site": {
+            "title": "Site ID",
+            "type": "string",
+            "default": "default",
+            "required": true
           },
           "strictSSL": {
-            "title": "Strict SSL?",
+            "title": "Validate the SSL Certificate?",
             "type": "boolean",
             "required": true,
             "default": false
           }
         }
       },
-      "site": {
-        "type": "string",
-        "title": "Site ID",
-        "required": true,
-        "default": ""
-      },
-      "rule": {
-        "type": "string",
-        "title": "Rule ID",
-        "required": true,
-        "default": ""
-      },
-      "inverted": {
-        "type": "boolean",
-        "title": "Inverted (enable rule when switched off)",
-        "required": true,
-        "default": true
+      "rules": {
+        "type": "array",
+        "items": {
+          "title": "Firewall Rules",
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Rule ID",
+              "type": "string",
+              "required": true
+            },
+            "name": {
+              "title": "Name",
+              "placeholder": "Name to give the switch in Homebridge",
+              "type": "string",
+              "required": true
+            },
+            "inverted": {
+              "type": "boolean",
+              "title": "Invert switch behaviour",
+              "required": true,
+              "default": false
+            }
+          }
+        }
       }
     }
   }
