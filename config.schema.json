@@ -45,7 +45,7 @@
           "type": "object",
           "properties": {
             "id": {
-              "title": "Rule ID",
+              "title": "Rule Index (typically 4 digit number)",
               "type": "string",
               "required": true
             },

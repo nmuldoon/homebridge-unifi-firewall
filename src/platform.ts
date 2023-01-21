@@ -72,12 +72,16 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
     const site = sites.find((site) => site.name === this.config.unifi.site);
     if (!site) {
       throw new Error(
-        `Site defined in Unifi config <${this.config.unifi.site}> does not exist on controller`
+        `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`
       );
     }
+    const fwRules = await site.firewall.getRules();
 
     for (const rule of this.config.rules) {
-      const fwRule = await site.firewall.getRule(rule.id);
+      const fwRule = fwRules.find((r) => r.rule_index === rule.id);
+      if (!fwRule) {
+        throw new Error(`Rule index <${rule.id}> was not found`);
+      }
       const uuid = this.api.hap.uuid.generate(rule.id);
 
       // see if an accessory with the same uuid has already been registered and restored from
