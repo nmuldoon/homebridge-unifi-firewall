@@ -12,7 +12,8 @@ export class UnifiFirewallSwitch {
     private readonly accessory: PlatformAccessory<{
       rule: UnifiFirewallRuleConfig;
     }>,
-    private readonly fwRule: FWRule
+    private readonly fwRule: FWRule,
+    private readonly invert: boolean
   ) {
     // set accessory information
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -41,17 +42,22 @@ export class UnifiFirewallSwitch {
   }
 
   async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
-    this.fwRule.enabled = value as boolean;
+    const newValue = value as boolean;
+
+    this.fwRule.enabled = this.invert ? !newValue : newValue;
     await this.fwRule.save();
 
-    this.platform.log.debug("Set Characteristic On ->", value);
+    this.platform.log.debug(
+      `Set Unifi Firewall ${this.fwRule._id}: ${newValue} (Inverted? ${this.invert})`
+    );
   }
 
   async getOn(): Promise<CharacteristicValue> {
-    const isOn = this.fwRule.enabled;
+    const isOn = this.invert ? !this.fwRule.enabled : this.fwRule.enabled;
 
-    this.platform.log.debug("Get Characteristic On ->", isOn);
+    this.platform.log.debug(
+      `Is Unifi Firewall ${this.fwRule._id} on? ${isOn} (Inverted? ${this.invert})`
+    );
 
     return isOn;
   }

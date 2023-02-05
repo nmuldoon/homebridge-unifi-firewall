@@ -102,7 +102,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        new UnifiFirewallSwitch(this, existingAccessory, fwRule);
+        new UnifiFirewallSwitch(this, existingAccessory, fwRule, rule.inverted);
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
         // remove platform accessories when no longer present
@@ -123,7 +123,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        new UnifiFirewallSwitch(this, accessory, fwRule);
+        new UnifiFirewallSwitch(this, accessory, fwRule, rule.inverted);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
