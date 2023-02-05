@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Unifi Firewall Switch",
   "name": "homebridge-unifi-firewall",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Toggle a UniFi Firewall rule on and off",
   "license": "GPL-3.0",
   "repository": {
