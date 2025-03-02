@@ -23,7 +23,7 @@ export class UnifiFirewallSwitch {
       .setCharacteristic(this.platform.Characteristic.Model, "Firewall-Rule")
       .setCharacteristic(
         this.platform.Characteristic.SerialNumber,
-        this.accessory.context.rule.id
+        this.accessory.context.rule.name
       );
 
     this.service =
@@ -48,7 +48,7 @@ export class UnifiFirewallSwitch {
     await this.fwRule.save();
 
     this.platform.log.debug(
-      `Set Unifi Firewall ${this.fwRule._id}: ${newValue} (Inverted? ${this.invert})`
+      `Set Unifi Firewall ${this.fwRule.name}: ${newValue} (Inverted? ${this.invert})`
     );
   }
 
@@ -56,7 +56,7 @@ export class UnifiFirewallSwitch {
     const isOn = this.invert ? !this.fwRule.enabled : this.fwRule.enabled;
 
     this.platform.log.debug(
-      `Is Unifi Firewall ${this.fwRule._id} on? ${isOn} (Inverted? ${this.invert})`
+      `Is Unifi Firewall ${this.fwRule.name} on? ${isOn} (Inverted? ${this.invert})`
     );
 
     return isOn;

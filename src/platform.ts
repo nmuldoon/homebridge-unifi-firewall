@@ -78,11 +78,11 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
     const fwRules = await site.firewall.getRules();
 
     for (const rule of this.config.rules) {
-      const fwRule = fwRules.find((r) => r.rule_index === rule.id);
+      const fwRule = fwRules.find((r) => r.name === rule.name);
       if (!fwRule) {
-        throw new Error(`Rule index <${rule.id}> was not found`);
+        throw new Error(`Rule index <${rule.name}> was not found`);
       }
-      const uuid = this.api.hap.uuid.generate(rule.id);
+      const uuid = this.api.hap.uuid.generate(rule.name);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -110,7 +110,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
         // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
       } else {
         // the accessory does not yet exist, so we need to create it
-        this.log.info(`Adding new accessory: ${rule.name} <${rule.id}>`);
+        this.log.info(`Adding new accessory: ${rule.name}`);
 
         // create a new accessory
         const accessory = new this.api.platformAccessory<{

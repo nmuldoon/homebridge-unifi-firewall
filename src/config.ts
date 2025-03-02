@@ -12,7 +12,6 @@ export interface UnifiControllerConfig {
 }
 
 export interface UnifiFirewallRuleConfig {
-  id: string;
   name: string;
   inverted: boolean;
 }
