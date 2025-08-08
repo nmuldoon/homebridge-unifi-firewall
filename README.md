@@ -7,16 +7,15 @@ A Homebridge plugin to toggle UniFi firewall rules and UniFi 9 firewall policies
 
 ## Features
 
-- Toggle traditional UniFi firewall rules on/off
 - Toggle UniFi 9 firewall policies on/off (new in v1.3.0)
 - Support for inverted switch behavior
 - Automatic discovery and management of accessories
-- Support for both UniFi OS and non-UniFi OS controllers
+- Support for UniFi Network 9 onwards
 
 ## Installation
 
 1. Install this plugin using: `npm install -g homebridge-unifi-firewall-toggle`
-2. Configure the plugin via the Homebridge Config UI X or manually edit your configuration file
+2. Configure the plugin via the Homebridge Config, or manually edit your configuration file
 3. Restart Homebridge
 
 ## Configuration
@@ -88,14 +87,6 @@ For UniFi 9 users, you can also control the newer policy-based firewall system:
 | `site`      | UniFi site name              | Yes      | `default` |
 | `strictSSL` | Validate SSL certificates    | No       | `false`   |
 
-### Traditional Firewall Rules (`rules`)
-
-| Field      | Description                          | Required | Default |
-| ---------- | ------------------------------------ | -------- | ------- |
-| `id`       | Firewall rule index (4-digit number) | Yes      | -       |
-| `name`     | Display name in HomeKit              | Yes      | -       |
-| `inverted` | Invert switch behavior               | No       | `false` |
-
 ### UniFi 9 Policies (`unifi9Policies`)
 
 | Field      | Description                    | Required | Default |
@@ -104,17 +95,12 @@ For UniFi 9 users, you can also control the newer policy-based firewall system:
 | `name`     | Display name in HomeKit        | Yes      | -       |
 | `inverted` | Invert switch behavior         | No       | `false` |
 
-## Finding Rule IDs
-
-1. Log into your UniFi Controller
-2. Navigate to **Settings** → **Security** → **Firewall Rules**
-3. Look for the rule index number (typically a 4-digit number like 2000, 4000, etc.)
-
 ## Finding UniFi 9 Policy IDs
 
 1. Log into your UniFi Controller (version 9+)
 2. Navigate to **Settings** → **Security** → **Firewall Policies**
 3. Use either the policy name or ID as shown in the interface
+4. Alternatively, use the `npm run discover-rules` command
 
 ## Inverted Behavior
 
@@ -126,10 +112,6 @@ Set `inverted: true` to reverse the switch behavior:
 This is useful for rules that block traffic - you might want "ON" to mean "allow traffic" (rule disabled).
 
 ## Troubleshooting
-
-### Plugin not working with UniFi 9
-
-Make sure you're using the `unifi9Policies` configuration instead of or in addition to the traditional `rules` configuration. The plugin will automatically detect and attempt to use the appropriate endpoints.
 
 ### Authentication Issues
 
@@ -149,7 +131,7 @@ If you're getting SSL errors, set `strictSSL: false` in your configuration.
 
 ## Development
 
-This plugin uses the latest `unifi-client` library for communication with UniFi Controllers. For UniFi 9 policies, custom API endpoints are used since they're not yet supported in the official library.
+This plugin uses the latest `unifi-client` library for communication with UniFi Controllers.
 
 ## Credits
 
@@ -157,7 +139,7 @@ Based on the original work by [jak](https://github.com/jak/homebridge-unifi-fire
 
 ## License
 
-This project is licensed under the GPL-3.0 License.
+This project is licensed under the Apache License 2.0.
 
 ## Setup Development Environment
 

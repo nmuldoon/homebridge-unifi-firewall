@@ -11,11 +11,7 @@ import {
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings";
 import { UniFi9PolicySwitch } from "./unifi9PolicyAccessory";
-import {
-  UnifiFirewallPlatformConfig,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  UniFi9PolicyConfig, // Used in UnifiFirewallPlatformConfig interface
-} from "./config";
+import { UnifiFirewallPlatformConfig, UniFi9PolicyConfig } from "./config";
 import { Controller, Site } from "unifi-client";
 import { UniFi9PolicyManager } from "./unifi9Policy";
 import { ConfigUIService } from "./configUI";
