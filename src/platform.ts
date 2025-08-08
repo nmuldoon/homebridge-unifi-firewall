@@ -11,8 +11,15 @@ import {
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings";
 import { UnifiFirewallSwitch } from "./platformAccessory";
-import { UnifiFirewallPlatformConfig, UnifiFirewallRuleConfig } from "./config";
-import { Controller } from "unifi-client";
+import { UniFi9PolicySwitch } from "./unifi9PolicyAccessory";
+import {
+  UnifiFirewallPlatformConfig,
+  UnifiFirewallRuleConfig,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  UniFi9PolicyConfig, // Used in UnifiFirewallPlatformConfig interface
+} from "./config";
+import { Controller, Site } from "unifi-client";
+import { UniFi9PolicyManager } from "./unifi9Policy";
 
 /**
  * UnifiFirewallPlatform
@@ -75,14 +82,21 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
         `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`
       );
     }
+
+    // this.log.info(
+    //   `Discovered site: ${site.name} with ${JSON.stringify(
+    //     await site.firewall
+    //   )} rules`
+    // );
+
     const fwRules = await site.firewall.getRules();
 
     for (const rule of this.config.rules) {
-      const fwRule = fwRules.find((r) => r.name === rule.name);
+      const fwRule = fwRules.find((r) => r.rule_index === rule.id);
       if (!fwRule) {
-        throw new Error(`Rule index <${rule.name}> was not found`);
+        throw new Error(`Rule index <${rule.id}> was not found`);
       }
-      const uuid = this.api.hap.uuid.generate(rule.name);
+      const uuid = this.api.hap.uuid.generate(rule.id);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -130,6 +144,87 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
           accessory,
         ]);
       }
+    }
+
+    // Handle UniFi 9 Policies if configured
+    if (this.config.unifi9Policies && this.config.unifi9Policies.length > 0) {
+      await this.discoverUniFi9Policies(controller, site);
+    }
+  }
+
+  async discoverUniFi9Policies(controller: Controller, site: Site) {
+    try {
+      const policyManager = new UniFi9PolicyManager(controller, site);
+      const policies = await policyManager.getPolicies();
+
+      this.log.info(`Found ${policies.length} UniFi 9 policies`);
+
+      if (!this.config.unifi9Policies) {
+        return;
+      }
+
+      for (const policyConfig of this.config.unifi9Policies) {
+        const policy = policies.find(
+          (p) => p._id === policyConfig.id || p.name === policyConfig.name
+        );
+        if (!policy) {
+          this.log.warn(
+            `UniFi 9 Policy ${policyConfig.id || policyConfig.name} not found`
+          );
+          continue;
+        }
+
+        const uuid = this.api.hap.uuid.generate(
+          `unifi9-policy-${policyConfig.id || policy._id}`
+        );
+
+        const existingAccessory = this.accessories.find(
+          (accessory) => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+          this.log.info(
+            `Restoring existing UniFi 9 policy from cache: ${existingAccessory.displayName}`
+          );
+          new UniFi9PolicySwitch(
+            this,
+            existingAccessory,
+            policy,
+            policyConfig.inverted,
+            controller,
+            site
+          );
+        } else {
+          this.log.info(
+            `Adding new UniFi 9 policy accessory: ${policyConfig.name}`
+          );
+
+          const accessory = new this.api.platformAccessory<{
+            rule: UnifiFirewallRuleConfig;
+          }>(policyConfig.name, uuid, Categories.SWITCH);
+
+          accessory.context.rule = {
+            id: policyConfig.id,
+            name: policyConfig.name,
+            inverted: policyConfig.inverted,
+          };
+
+          new UniFi9PolicySwitch(
+            this,
+            accessory,
+            policy,
+            policyConfig.inverted,
+            controller,
+            site
+          );
+
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+            accessory,
+          ]);
+        }
+      }
+    } catch (error) {
+      this.log.error("Failed to discover UniFi 9 policies:", error);
     }
   }
 }

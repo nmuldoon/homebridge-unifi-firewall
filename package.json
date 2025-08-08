@@ -1,15 +1,15 @@
 {
   "displayName": "Homebridge Unifi Firewall Switch",
-  "name": "homebridge-unifi-firewall-toggle",
-  "version": "1.2.1",
+  "name": "homebridge-unifi-firewall",
+  "version": "1.2.2",
   "description": "Toggle a UniFi Firewall rule on and off (based on jak's homebridge-unifi-firewall)",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jak/homebridge-unifi-firewall.git"
+    "url": "git://github.com/nmuldoon/homebridge-unifi-firewall.git"
   },
   "bugs": {
-    "url": "https://github.com/jak/homebridge-unifi-firewall/issues"
+    "url": "https://github.com/nmuldoon/homebridge-unifi-firewall/issues"
   },
   "engines": {
     "node": ">=14.18.1",
@@ -21,7 +21,8 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "discover": "./discover.sh"
   },
   "keywords": [
     "homebridge-plugin",

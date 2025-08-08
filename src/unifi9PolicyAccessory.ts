@@ -2,25 +2,32 @@ import { Service, PlatformAccessory, CharacteristicValue } from "homebridge";
 
 import { UnifiFirewallPlatform } from "./platform";
 import { UnifiFirewallRuleConfig } from "./config";
-import { FWRule } from "unifi-client";
+import { UniFi9PolicyManager, UniFi9FirewallPolicy } from "./unifi9Policy";
+import { Controller, Site } from "unifi-client";
 
-export class UnifiFirewallSwitch {
+export class UniFi9PolicySwitch {
   private service: Service;
+  private policyManager: UniFi9PolicyManager;
 
   constructor(
     private readonly platform: UnifiFirewallPlatform,
     private readonly accessory: PlatformAccessory<{
       rule: UnifiFirewallRuleConfig;
     }>,
-    private readonly fwRule: FWRule,
-    private readonly invert: boolean
+    private readonly policy: UniFi9FirewallPolicy,
+    private readonly invert: boolean,
+    private readonly controller: Controller,
+    private readonly site: Site
   ) {
+    // Create policy manager
+    this.policyManager = new UniFi9PolicyManager(this.controller, this.site);
+
     // set accessory information
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, "Ubiquiti")
-      .setCharacteristic(this.platform.Characteristic.Model, "Firewall-Rule")
+      .setCharacteristic(this.platform.Characteristic.Model, "UniFi-9-Policy")
       .setCharacteristic(
         this.platform.Characteristic.SerialNumber,
         this.accessory.context.rule.name
@@ -43,20 +50,30 @@ export class UnifiFirewallSwitch {
 
   async setOn(value: CharacteristicValue) {
     const newValue = value as boolean;
+    const targetEnabled = this.invert ? !newValue : newValue;
 
-    this.fwRule.enabled = this.invert ? !newValue : newValue;
-    await this.fwRule.save();
+    try {
+      await this.policyManager.updatePolicy(this.policy._id, targetEnabled);
+      // Update local policy state
+      this.policy.enabled = targetEnabled;
 
-    this.platform.log.debug(
-      `Set Unifi Firewall ${this.fwRule._id}: ${newValue} (Inverted? ${this.invert})`
-    );
+      this.platform.log.debug(
+        `Set UniFi 9 Policy ${this.policy._id}: ${newValue} (Inverted? ${this.invert})`
+      );
+    } catch (error) {
+      this.platform.log.error(
+        `Failed to update UniFi 9 Policy ${this.policy._id}:`,
+        error
+      );
+      throw error;
+    }
   }
 
   async getOn(): Promise<CharacteristicValue> {
-    const isOn = this.invert ? !this.fwRule.enabled : this.fwRule.enabled;
+    const isOn = this.invert ? !this.policy.enabled : this.policy.enabled;
 
     this.platform.log.debug(
-      `Is Unifi Firewall ${this.fwRule._id} on? ${isOn} (Inverted? ${this.invert})`
+      `Is UniFi 9 Policy ${this.policy._id} on? ${isOn} (Inverted? ${this.invert})`
     );
 
     return isOn;

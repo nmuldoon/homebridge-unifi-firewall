@@ -63,6 +63,35 @@
             }
           }
         }
+      },
+      "unifi9Policies": {
+        "type": "array",
+        "title": "UniFi 9 Firewall Policies",
+        "description": "UniFi 9 firewall policies (newer policy-based firewall system)",
+        "items": {
+          "title": "UniFi 9 Policy",
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Policy ID or Name",
+              "type": "string",
+              "required": true,
+              "description": "The policy ID or name from UniFi 9"
+            },
+            "name": {
+              "title": "Display Name",
+              "placeholder": "Name to give the switch in Homebridge",
+              "type": "string",
+              "required": true
+            },
+            "inverted": {
+              "type": "boolean",
+              "title": "Invert switch behaviour",
+              "required": true,
+              "default": false
+            }
+          }
+        }
       }
     }
   }

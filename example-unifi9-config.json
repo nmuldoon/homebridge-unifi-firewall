@@ -1,0 +1,17 @@
+{
+  "platform": "UniFiFirewall",
+  "unifi": {
+    "url": "https://192.168.1.1",
+    "username": "your_username",
+    "password": "your_password",
+    "site": "default",
+    "strictSSL": false
+  },
+  "unifi9Policies": [
+    {
+      "id": "POLICY_ID_FROM_DISCOVERY",
+      "displayName": "My Firewall Policy",
+      "inverted": false
+    }
+  ]
+}

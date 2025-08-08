@@ -1,24 +1,163 @@
-<p align="center">
+# Homebridge UniFi Firewall Plugin
 
-<img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="150">
+[![npm](https://img.shields.io/npm/v/homebridge-unifi-firewall-toggle.svg)](https://www.npmjs.com/package/homebridge-unifi-firewall-toggle)
+[![npm](https://img.shields.io/npm/dt/homebridge-unifi-firewall-toggle.svg)](https://www.npmjs.com/package/homebridge-unifi-firewall-toggle)
 
-</p>
+A Homebridge plugin to toggle UniFi firewall rules and UniFi 9 firewall policies on and off via HomeKit.
 
-# Homebridge Platform Plugin Template
+## Features
 
-This is a template Homebridge platform plugin and can be used as a base to help you get started developing your own plugin.
+- Toggle traditional UniFi firewall rules on/off
+- Toggle UniFi 9 firewall policies on/off (new in v1.3.0)
+- Support for inverted switch behavior
+- Automatic discovery and management of accessories
+- Support for both UniFi OS and non-UniFi OS controllers
 
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
+## Installation
 
-## Clone As Template
+1. Install this plugin using: `npm install -g homebridge-unifi-firewall-toggle`
+2. Configure the plugin via the Homebridge Config UI X or manually edit your configuration file
+3. Restart Homebridge
 
-Click the link below to create a new GitHub Repository using this template, or click the _Use This Template_ button above.
+## Configuration
 
-<span align="center">
+### Basic Configuration
 
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
+```json
+{
+  "platform": "UnifiFirewall",
+  "unifi": {
+    "url": "https://192.168.1.1",
+    "username": "admin",
+    "password": "password",
+    "site": "default",
+    "strictSSL": false
+  },
+  "rules": [
+    {
+      "id": "2000",
+      "name": "Block IoT Devices",
+      "inverted": false
+    }
+  ]
+}
+```
 
-</span>
+### UniFi 9 Firewall Policies
+
+For UniFi 9 users, you can also control the newer policy-based firewall system:
+
+```json
+{
+  "platform": "UnifiFirewall",
+  "unifi": {
+    "url": "https://192.168.1.1",
+    "username": "admin",
+    "password": "password",
+    "site": "default",
+    "strictSSL": false
+  },
+  "rules": [
+    {
+      "id": "2000",
+      "name": "Block IoT Devices",
+      "inverted": false
+    }
+  ],
+  "unifi9Policies": [
+    {
+      "id": "policy-id-or-name",
+      "name": "Guest Network Policy",
+      "inverted": false
+    }
+  ]
+}
+```
+
+📋 **See [`example-config.json`](example-config.json) for a complete configuration example with both traditional rules and UniFi 9 policies.**
+
+## Configuration Options
+
+### UniFi Controller Settings (`unifi`)
+
+| Field       | Description                  | Required | Default   |
+| ----------- | ---------------------------- | -------- | --------- |
+| `url`       | URL of your UniFi Controller | Yes      | -         |
+| `username`  | UniFi Controller username    | Yes      | -         |
+| `password`  | UniFi Controller password    | Yes      | -         |
+| `site`      | UniFi site name              | Yes      | `default` |
+| `strictSSL` | Validate SSL certificates    | No       | `false`   |
+
+### Traditional Firewall Rules (`rules`)
+
+| Field      | Description                          | Required | Default |
+| ---------- | ------------------------------------ | -------- | ------- |
+| `id`       | Firewall rule index (4-digit number) | Yes      | -       |
+| `name`     | Display name in HomeKit              | Yes      | -       |
+| `inverted` | Invert switch behavior               | No       | `false` |
+
+### UniFi 9 Policies (`unifi9Policies`)
+
+| Field      | Description                    | Required | Default |
+| ---------- | ------------------------------ | -------- | ------- |
+| `id`       | Policy ID or name from UniFi 9 | Yes      | -       |
+| `name`     | Display name in HomeKit        | Yes      | -       |
+| `inverted` | Invert switch behavior         | No       | `false` |
+
+## Finding Rule IDs
+
+1. Log into your UniFi Controller
+2. Navigate to **Settings** → **Security** → **Firewall Rules**
+3. Look for the rule index number (typically a 4-digit number like 2000, 4000, etc.)
+
+## Finding UniFi 9 Policy IDs
+
+1. Log into your UniFi Controller (version 9+)
+2. Navigate to **Settings** → **Security** → **Firewall Policies**
+3. Use either the policy name or ID as shown in the interface
+
+## Inverted Behavior
+
+Set `inverted: true` to reverse the switch behavior:
+
+- **Normal**: Switch ON = Rule/Policy Enabled, Switch OFF = Rule/Policy Disabled
+- **Inverted**: Switch ON = Rule/Policy Disabled, Switch OFF = Rule/Policy Enabled
+
+This is useful for rules that block traffic - you might want "ON" to mean "allow traffic" (rule disabled).
+
+## Troubleshooting
+
+### Plugin not working with UniFi 9
+
+Make sure you're using the `unifi9Policies` configuration instead of or in addition to the traditional `rules` configuration. The plugin will automatically detect and attempt to use the appropriate endpoints.
+
+### Authentication Issues
+
+- Ensure your credentials are correct
+- Try creating a dedicated local user account for the plugin
+- Verify the site name is correct (usually "default")
+
+### SSL Certificate Issues
+
+If you're getting SSL errors, set `strictSSL: false` in your configuration.
+
+### Rule/Policy Not Found
+
+- Double-check the rule index or policy ID
+- Ensure the rule/policy exists and is visible in the UniFi Controller
+- Check the logs for detailed error messages
+
+## Development
+
+This plugin uses the latest `unifi-client` library for communication with UniFi Controllers. For UniFi 9 policies, custom API endpoints are used since they're not yet supported in the official library.
+
+## Credits
+
+Based on the original work by [jak](https://github.com/jak/homebridge-unifi-firewall).
+
+## License
+
+This project is licensed under the GPL-3.0 License.
 
 ## Setup Development Environment
 
