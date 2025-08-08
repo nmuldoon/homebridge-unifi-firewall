@@ -20,6 +20,7 @@ import {
 } from "./config";
 import { Controller, Site } from "unifi-client";
 import { UniFi9PolicyManager } from "./unifi9Policy";
+import { ConfigUIService } from "./configUI";
 
 /**
  * UnifiFirewallPlatform
@@ -55,6 +56,21 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
   }
 
   /**
+   * Discover rules and policies for Config UI
+   * This method can be called programmatically for discovery
+   */
+  async discoverRulesAndPolicies(discoveryConfig: {
+    url: string;
+    username: string;
+    password: string;
+    site: string;
+    strictSSL: boolean;
+  }) {
+    const configUIService = new ConfigUIService(this.log);
+    return await configUIService.discoverRulesAndPolicies(discoveryConfig);
+  }
+
+  /**
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to setup event handlers for characteristics and update respective values.
    */
@@ -73,85 +89,134 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   async discoverDevices() {
-    const controller = new Controller(this.config.unifi);
-    await controller.login();
-    const sites = await controller.getSites();
-    const site = sites.find((site) => site.name === this.config.unifi.site);
-    if (!site) {
-      throw new Error(
-        `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`
-      );
-    }
+    try {
+      // Disable SSL certificate validation for self-signed certificates
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-    // this.log.info(
-    //   `Discovered site: ${site.name} with ${JSON.stringify(
-    //     await site.firewall
-    //   )} rules`
-    // );
+      this.log.info("Connecting to UniFi Controller...");
+      this.log.debug(`Controller URL: ${this.config.unifi.url}`);
+      this.log.debug(`Site: ${this.config.unifi.site}`);
 
-    const fwRules = await site.firewall.getRules();
+      const controller = new Controller({
+        ...this.config.unifi,
+        strictSSL: false,
+      });
 
-    for (const rule of this.config.rules) {
-      const fwRule = fwRules.find((r) => r.rule_index === rule.id);
-      if (!fwRule) {
-        throw new Error(`Rule index <${rule.id}> was not found`);
+      await controller.login();
+      this.log.info("✅ Successfully connected to UniFi Controller");
+
+      const sites = await controller.getSites();
+      this.log.debug(`Found ${sites.length} sites`);
+
+      const site = sites.find((site) => site.name === this.config.unifi.site);
+      if (!site) {
+        this.log.error(
+          `Available sites: ${sites.map((s) => s.name).join(", ")}`
+        );
+        throw new Error(
+          `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`
+        );
       }
-      const uuid = this.api.hap.uuid.generate(rule.id);
 
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(
-        (accessory) => accessory.UUID === uuid
+      this.log.info(
+        `Using site: ${site.name} (${site.desc || "no description"})`
       );
 
-      if (existingAccessory) {
-        // the accessory already exists
-        this.log.info(
-          `Restoring existing accessory from cache: ${existingAccessory.displayName}`
+      // this.log.info(
+      //   `Discovered site: ${site.name} with ${JSON.stringify(
+      //     await site.firewall
+      //   )} rules`
+      // );
+
+      const fwRules = await site.firewall.getRules();
+
+      for (const rule of this.config.rules) {
+        const fwRule = fwRules.find((r) => r.rule_index === rule.id);
+        if (!fwRule) {
+          throw new Error(`Rule index <${rule.id}> was not found`);
+        }
+        const uuid = this.api.hap.uuid.generate(rule.id);
+
+        // see if an accessory with the same uuid has already been registered and restored from
+        // the cached devices we stored in the `configureAccessory` method above
+        const existingAccessory = this.accessories.find(
+          (accessory) => accessory.UUID === uuid
         );
 
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        // existingAccessory.context.rule = rule;
-        // this.api.updatePlatformAccessories([existingAccessory]);
+        if (existingAccessory) {
+          // the accessory already exists
+          this.log.info(
+            `Restoring existing accessory from cache: ${existingAccessory.displayName}`
+          );
 
-        // create the accessory handler for the restored accessory
-        // this is imported from `platformAccessory.ts`
-        new UnifiFirewallSwitch(this, existingAccessory, fwRule, rule.inverted);
+          // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
+          // existingAccessory.context.rule = rule;
+          // this.api.updatePlatformAccessories([existingAccessory]);
 
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-      } else {
-        // the accessory does not yet exist, so we need to create it
-        this.log.info(`Adding new accessory: ${rule.name}`);
+          // create the accessory handler for the restored accessory
+          // this is imported from `platformAccessory.ts`
+          new UnifiFirewallSwitch(
+            this,
+            existingAccessory,
+            fwRule,
+            rule.inverted
+          );
 
-        // create a new accessory
-        const accessory = new this.api.platformAccessory<{
-          rule: UnifiFirewallRuleConfig;
-        }>(rule.name, uuid, Categories.SWITCH);
+          // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
+          // remove platform accessories when no longer present
+          // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+          // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+        } else {
+          // the accessory does not yet exist, so we need to create it
+          this.log.info(`Adding new accessory: ${rule.name}`);
 
-        // store a copy of the rule object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.rule = rule;
+          // create a new accessory
+          const accessory = new this.api.platformAccessory<{
+            rule: UnifiFirewallRuleConfig;
+          }>(rule.name, uuid, Categories.SWITCH);
 
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        new UnifiFirewallSwitch(this, accessory, fwRule, rule.inverted);
+          // store a copy of the rule object in the `accessory.context`
+          // the `context` property can be used to store any data about the accessory you may need
+          accessory.context.rule = rule;
 
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-          accessory,
-        ]);
+          // create the accessory handler for the newly create accessory
+          // this is imported from `platformAccessory.ts`
+          new UnifiFirewallSwitch(this, accessory, fwRule, rule.inverted);
+
+          // link the accessory to your platform
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+            accessory,
+          ]);
+        }
       }
-    }
 
-    // Handle UniFi 9 Policies if configured
-    if (this.config.unifi9Policies && this.config.unifi9Policies.length > 0) {
-      await this.discoverUniFi9Policies(controller, site);
+      // Discover and register UniFi 9 policies if configured
+      if (this.config.unifi9Policies && this.config.unifi9Policies.length > 0) {
+        await this.discoverUniFi9Policies(controller, site);
+      }
+    } catch (error) {
+      this.log.error("Failed to connect to UniFi Controller:");
+      this.log.error(`Error: ${(error as Error).message}`);
+
+      // Provide helpful troubleshooting information
+      this.log.error("");
+      this.log.error("Troubleshooting steps:");
+      this.log.error("1. Verify the controller URL is correct");
+      this.log.error("2. Check username and password");
+      this.log.error("3. Ensure the user has admin privileges");
+      this.log.error("4. Try disabling strictSSL in config");
+      this.log.error("5. Test connection with the discovery script first:");
+      this.log.error(
+        `   npm run discover-rules "${this.config.unifi.url}" "username" "password"`
+      );
+
+      throw error;
     }
   }
 
+  /**
+   * Discover and register UniFi 9 policies
+   */
   async discoverUniFi9Policies(controller: Controller, site: Site) {
     try {
       const policyManager = new UniFi9PolicyManager(controller, site);
