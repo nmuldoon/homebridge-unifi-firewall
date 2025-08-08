@@ -10,11 +10,9 @@ import {
 } from "homebridge";
 
 import { PLATFORM_NAME, PLUGIN_NAME } from "./settings";
-import { UnifiFirewallSwitch } from "./platformAccessory";
 import { UniFi9PolicySwitch } from "./unifi9PolicyAccessory";
 import {
   UnifiFirewallPlatformConfig,
-  UnifiFirewallRuleConfig,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   UniFi9PolicyConfig, // Used in UnifiFirewallPlatformConfig interface
 } from "./config";
@@ -34,7 +32,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory<{
-    rule: UnifiFirewallRuleConfig;
+    policy: UniFi9PolicyConfig;
   }>[] = [];
 
   constructor(
@@ -75,7 +73,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
    * It should be used to setup event handlers for characteristics and update respective values.
    */
   configureAccessory(
-    accessory: PlatformAccessory<{ rule: UnifiFirewallRuleConfig }>
+    accessory: PlatformAccessory<{ policy: UniFi9PolicyConfig }>
   ) {
     this.log.info("Loading accessory from cache:", accessory.displayName);
 
@@ -122,77 +120,13 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
         `Using site: ${site.name} (${site.desc || "no description"})`
       );
 
-      // this.log.info(
-      //   `Discovered site: ${site.name} with ${JSON.stringify(
-      //     await site.firewall
-      //   )} rules`
-      // );
-
-      const fwRules = await site.firewall.getRules();
-
-      for (const rule of this.config.rules) {
-        const fwRule = fwRules.find((r) => r.rule_index === rule.id);
-        if (!fwRule) {
-          throw new Error(`Rule index <${rule.id}> was not found`);
-        }
-        const uuid = this.api.hap.uuid.generate(rule.id);
-
-        // see if an accessory with the same uuid has already been registered and restored from
-        // the cached devices we stored in the `configureAccessory` method above
-        const existingAccessory = this.accessories.find(
-          (accessory) => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-          // the accessory already exists
-          this.log.info(
-            `Restoring existing accessory from cache: ${existingAccessory.displayName}`
-          );
-
-          // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-          // existingAccessory.context.rule = rule;
-          // this.api.updatePlatformAccessories([existingAccessory]);
-
-          // create the accessory handler for the restored accessory
-          // this is imported from `platformAccessory.ts`
-          new UnifiFirewallSwitch(
-            this,
-            existingAccessory,
-            fwRule,
-            rule.inverted
-          );
-
-          // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-          // remove platform accessories when no longer present
-          // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-          // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
-        } else {
-          // the accessory does not yet exist, so we need to create it
-          this.log.info(`Adding new accessory: ${rule.name}`);
-
-          // create a new accessory
-          const accessory = new this.api.platformAccessory<{
-            rule: UnifiFirewallRuleConfig;
-          }>(rule.name, uuid, Categories.SWITCH);
-
-          // store a copy of the rule object in the `accessory.context`
-          // the `context` property can be used to store any data about the accessory you may need
-          accessory.context.rule = rule;
-
-          // create the accessory handler for the newly create accessory
-          // this is imported from `platformAccessory.ts`
-          new UnifiFirewallSwitch(this, accessory, fwRule, rule.inverted);
-
-          // link the accessory to your platform
-          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
-            accessory,
-          ]);
-        }
-      }
-
-      // Discover and register UniFi 9 policies if configured
+      // Only discover and register UniFi 9 policies
       if (this.config.unifi9Policies && this.config.unifi9Policies.length > 0) {
         await this.discoverUniFi9Policies(controller, site);
+      } else {
+        this.log.info(
+          "No UniFi 9 policies configured. Add policies to your configuration to create accessories."
+        );
       }
     } catch (error) {
       this.log.error("Failed to connect to UniFi Controller:");
@@ -265,10 +199,10 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
           );
 
           const accessory = new this.api.platformAccessory<{
-            rule: UnifiFirewallRuleConfig;
+            policy: UniFi9PolicyConfig;
           }>(policyConfig.name, uuid, Categories.SWITCH);
 
-          accessory.context.rule = {
+          accessory.context.policy = {
             id: policyConfig.id,
             name: policyConfig.name,
             inverted: policyConfig.inverted,

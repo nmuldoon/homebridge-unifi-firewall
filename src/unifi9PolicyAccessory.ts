@@ -1,7 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue } from "homebridge";
 
 import { UnifiFirewallPlatform } from "./platform";
-import { UnifiFirewallRuleConfig } from "./config";
+import { UniFi9PolicyConfig } from "./config";
 import { UniFi9PolicyManager, UniFi9FirewallPolicy } from "./unifi9Policy";
 import { Controller, Site } from "unifi-client";
 
@@ -12,7 +12,7 @@ export class UniFi9PolicySwitch {
   constructor(
     private readonly platform: UnifiFirewallPlatform,
     private readonly accessory: PlatformAccessory<{
-      rule: UnifiFirewallRuleConfig;
+      policy: UniFi9PolicyConfig;
     }>,
     private readonly policy: UniFi9FirewallPolicy,
     private readonly invert: boolean,
@@ -30,7 +30,7 @@ export class UniFi9PolicySwitch {
       .setCharacteristic(this.platform.Characteristic.Model, "UniFi-9-Policy")
       .setCharacteristic(
         this.platform.Characteristic.SerialNumber,
-        this.accessory.context.rule.name
+        this.accessory.context.policy.name
       );
 
     this.service =
@@ -39,7 +39,7 @@ export class UniFi9PolicySwitch {
 
     this.service.setCharacteristic(
       this.platform.Characteristic.Name,
-      accessory.context.rule.name
+      accessory.context.policy.name
     );
 
     this.service

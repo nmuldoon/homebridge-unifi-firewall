@@ -38,49 +38,7 @@
           }
         }
       },
-      "discovery": {
-        "type": "object",
-        "title": "🔍 Discovery Tools",
-        "description": "Use these tools to discover available firewall rules and policies",
-        "properties": {
-          "help": {
-            "title": "Discovery Help",
-            "type": "string",
-            "readonly": true,
-            "default": "Use the npm scripts to discover rules: 'npm run discover-rules <host> <username> <password>' or 'npm run discover' for interactive discovery"
-          }
-        }
-      },
-      "rules": {
-        "type": "array",
-        "title": "Traditional Firewall Rules",
-        "description": "Traditional UniFi firewall rules (older rule-based system). Use 'npm run discover-rules' to find available rules.",
-        "items": {
-          "title": "Firewall Rules",
-          "type": "object",
-          "properties": {
-            "id": {
-              "title": "Rule Index",
-              "type": "string",
-              "required": true,
-              "description": "The rule index number from your UniFi Controller (use discovery script to find)",
-              "placeholder": "e.g., 2000, 2001, etc."
-            },
-            "name": {
-              "title": "Name",
-              "placeholder": "Name to give the switch in Homebridge",
-              "type": "string",
-              "required": true
-            },
-            "inverted": {
-              "type": "boolean",
-              "title": "Invert switch behaviour",
-              "required": true,
-              "default": false
-            }
-          }
-        }
-      },
+
       "unifi9Policies": {
         "type": "array",
         "title": "UniFi 9 Firewall Policies",

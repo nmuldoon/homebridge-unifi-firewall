@@ -22,7 +22,8 @@
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
     "prepare": "husky install",
-    "discover-rules": "npm run build && node dist/discover-rules.js"
+    "discover-rules": "npm run build && node dist/discover-rules.js",
+    "test-policy-toggle": "npm run build && node dist/test-policy-toggle.js"
   },
   "keywords": [
     "homebridge-plugin",
