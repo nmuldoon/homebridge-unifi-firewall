@@ -35,6 +35,10 @@
   "dependencies": {
     "unifi-client": "^0.11.1"
   },
+  "overrides": {
+    "axios": "^1.17.0",
+    "ws": "^8.21.0"
+  },
   "devDependencies": {
     "@types/debug": "^4.1.13",
     "@types/node": "^22.0.0",
