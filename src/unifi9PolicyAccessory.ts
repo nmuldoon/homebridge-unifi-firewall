@@ -61,9 +61,9 @@ export class UniFi9PolicySwitch {
         `Set UniFi 9 Policy ${this.policy._id}: ${newValue} (Inverted? ${this.invert})`
       );
     } catch (error) {
+      const message = (error as Error)?.message ?? String(error);
       this.platform.log.error(
-        `Failed to update UniFi 9 Policy ${this.policy._id}:`,
-        error
+        `Failed to update UniFi 9 Policy ${this.policy._id}: ${message}`
       );
       throw error;
     }
