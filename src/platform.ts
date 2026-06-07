@@ -34,7 +34,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
   constructor(
     public readonly log: Logger,
     public readonly config: PlatformConfig & UnifiFirewallPlatformConfig,
-    public readonly api: API
+    public readonly api: API,
   ) {
     this.log.debug(`Finished initializing platform: ${this.config.name}`);
 
@@ -69,7 +69,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
    * It should be used to setup event handlers for characteristics and update respective values.
    */
   configureAccessory(
-    accessory: PlatformAccessory<{ policy: UniFi9PolicyConfig }>
+    accessory: PlatformAccessory<{ policy: UniFi9PolicyConfig }>,
   ) {
     this.log.info("Loading accessory from cache:", accessory.displayName);
 
@@ -105,15 +105,15 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
       const site = sites.find((site) => site.name === this.config.unifi.site);
       if (!site) {
         this.log.error(
-          `Available sites: ${sites.map((s) => s.name).join(", ")}`
+          `Available sites: ${sites.map((s) => s.name).join(", ")}`,
         );
         throw new Error(
-          `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`
+          `Site defined in Unifi config <${this.config.unifi.site}> was not found on the controller (Check the Controller URL)`,
         );
       }
 
       this.log.info(
-        `Using site: ${site.name} (${site.desc || "no description"})`
+        `Using site: ${site.name} (${site.desc || "no description"})`,
       );
 
       // Only discover and register UniFi 9 policies
@@ -121,7 +121,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
         await this.discoverUniFi9Policies(controller, site);
       } else {
         this.log.info(
-          "No UniFi 9 policies configured. Add policies to your configuration to create accessories."
+          "No UniFi 9 policies configured. Add policies to your configuration to create accessories.",
         );
       }
     } catch (error) {
@@ -137,7 +137,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
       this.log.error("4. Try disabling strictSSL in config");
       this.log.error("5. Test connection with the discovery script first:");
       this.log.error(
-        `   npm run discover-rules "${this.config.unifi.url}" "username" "password"`
+        `   npm run discover-rules "${this.config.unifi.url}" "username" "password"`,
       );
 
       throw error;
@@ -160,26 +160,26 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
 
       for (const policyConfig of this.config.unifi9Policies) {
         const policy = policies.find(
-          (p) => p._id === policyConfig.id || p.name === policyConfig.name
+          (p) => p._id === policyConfig.id || p.name === policyConfig.name,
         );
         if (!policy) {
           this.log.warn(
-            `UniFi 9 Policy ${policyConfig.id || policyConfig.name} not found`
+            `UniFi 9 Policy ${policyConfig.id || policyConfig.name} not found`,
           );
           continue;
         }
 
         const uuid = this.api.hap.uuid.generate(
-          `unifi9-policy-${policyConfig.id || policy._id}`
+          `unifi9-policy-${policyConfig.id || policy._id}`,
         );
 
         const existingAccessory = this.accessories.find(
-          (accessory) => accessory.UUID === uuid
+          (accessory) => accessory.UUID === uuid,
         );
 
         if (existingAccessory) {
           this.log.info(
-            `Restoring existing UniFi 9 policy from cache: ${existingAccessory.displayName}`
+            `Restoring existing UniFi 9 policy from cache: ${existingAccessory.displayName}`,
           );
           new UniFi9PolicySwitch(
             this,
@@ -187,11 +187,11 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
             policy,
             policyConfig.inverted,
             controller,
-            site
+            site,
           );
         } else {
           this.log.info(
-            `Adding new UniFi 9 policy accessory: ${policyConfig.name}`
+            `Adding new UniFi 9 policy accessory: ${policyConfig.name}`,
           );
 
           const accessory = new this.api.platformAccessory<{
@@ -210,7 +210,7 @@ export class UnifiFirewallPlatform implements DynamicPlatformPlugin {
             policy,
             policyConfig.inverted,
             controller,
-            site
+            site,
           );
 
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [

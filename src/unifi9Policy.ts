@@ -78,7 +78,10 @@ function formatError(error: unknown): Error {
 }
 
 export class UniFi9PolicyManager {
-  constructor(private controller: Controller, private site: Site) {}
+  constructor(
+    private controller: Controller,
+    private site: Site,
+  ) {}
 
   // Run a request and, if it fails with 401, re-authenticate the controller and
   // retry it once. The UniFi controller can invalidate sessions server-side
@@ -86,7 +89,7 @@ export class UniFi9PolicyManager {
   // is still within its validity window.
   private async withReauthRetry<T>(
     description: string,
-    request: () => Promise<T>
+    request: () => Promise<T>,
   ): Promise<T> {
     try {
       return await request();
@@ -95,14 +98,14 @@ export class UniFi9PolicyManager {
         throw error;
       }
       console.log(
-        `${description}: got 401 from UniFi controller, re-authenticating and retrying once`
+        `${description}: got 401 from UniFi controller, re-authenticating and retrying once`,
       );
       try {
         await this.controller.login();
       } catch (loginError) {
         console.error(
           `${description}: re-authentication failed:`,
-          (loginError as Error)?.message ?? loginError
+          (loginError as Error)?.message ?? loginError,
         );
         throw error;
       }
@@ -131,7 +134,7 @@ export class UniFi9PolicyManager {
                 urlParams: {
                   site: this.site.name,
                 },
-              })
+              }),
           );
 
           const responseData = response.data?.data || response.data;
@@ -145,7 +148,7 @@ export class UniFi9PolicyManager {
           console.log(
             `Endpoint ${endpoint.url} not accessible: ${
               formatError(error).message
-            }`
+            }`,
           );
         }
       }
@@ -154,7 +157,7 @@ export class UniFi9PolicyManager {
     } catch (error) {
       console.error(
         "Error fetching UniFi 9 policies:",
-        formatError(error).message
+        formatError(error).message,
       );
       return [];
     }
@@ -175,19 +178,19 @@ export class UniFi9PolicyManager {
           headers: {
             "Content-Type": "application/json",
           },
-        })
+        }),
       );
 
       console.log(
         `Successfully updated UniFi 9 policy ${policyId} to ${
           enabled ? "enabled" : "disabled"
-        }`
+        }`,
       );
     } catch (error) {
       const formatted = formatError(error);
       console.error(
         `Error updating UniFi 9 policy ${policyId}:`,
-        formatted.message
+        formatted.message,
       );
       throw formatted;
     }
