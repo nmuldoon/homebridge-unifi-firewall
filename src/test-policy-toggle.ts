@@ -33,10 +33,10 @@ async function testPolicyToggle(): Promise<void> {
 
   if (!config.url || !config.username || !config.password) {
     console.log(
-      "Usage: npm run test-policy-toggle <url> <username> <password> [site] [command] [policyId]"
+      "Usage: npm run test-policy-toggle <url> <username> <password> [site] [command] [policyId]",
     );
     console.log(
-      "Or set environment variables: UNIFI_URL, UNIFI_USERNAME, UNIFI_PASSWORD, UNIFI_SITE"
+      "Or set environment variables: UNIFI_URL, UNIFI_USERNAME, UNIFI_PASSWORD, UNIFI_SITE",
     );
     console.log("");
     console.log("Commands:");
@@ -47,10 +47,10 @@ async function testPolicyToggle(): Promise<void> {
     console.log("");
     console.log("Examples:");
     console.log(
-      "  npm run test-policy-toggle https://192.168.1.1 admin password default list"
+      "  npm run test-policy-toggle https://192.168.1.1 admin password default list",
     );
     console.log(
-      "  npm run test-policy-toggle https://192.168.1.1 admin password default toggle 507f1f77bcf86cd799439011"
+      "  npm run test-policy-toggle https://192.168.1.1 admin password default toggle 507f1f77bcf86cd799439011",
     );
     process.exit(1);
   }
@@ -80,7 +80,7 @@ async function testPolicyToggle(): Promise<void> {
       } catch (error) {
         console.log(
           `❌ Connection attempt ${attempts} failed:`,
-          (error as Error).message
+          (error as Error).message,
         );
         if (attempts < maxAttempts) {
           const delay = Math.pow(2, attempts) * 1000; // Exponential backoff
@@ -101,7 +101,7 @@ async function testPolicyToggle(): Promise<void> {
     if (!site) {
       console.error(
         `❌ Site '${config.site}' not found. Available sites:`,
-        sites.map((s) => s.name)
+        sites.map((s) => s.name),
       );
       return;
     }
@@ -164,7 +164,7 @@ async function listPolicies(policyManager: UniFi9PolicyManager): Promise<void> {
 
   console.log(`\n✅ Found ${policies.length} UniFi 9 firewall policies:`);
   console.log(
-    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
   );
 
   policies.forEach((policy, index) => {
@@ -180,13 +180,13 @@ async function listPolicies(policyManager: UniFi9PolicyManager): Promise<void> {
 
   console.log("💡 To toggle a policy, use:");
   console.log(
-    `   npm run test-policy-toggle [url] [username] [password] [site] toggle <policy-id>`
+    `   npm run test-policy-toggle [url] [username] [password] [site] toggle <policy-id>`,
   );
 }
 
 async function togglePolicy(
   policyManager: UniFi9PolicyManager,
-  policyId: string
+  policyId: string,
 ): Promise<void> {
   console.log(`\n🔄 Toggling policy ${policyId}...`);
 
@@ -205,7 +205,7 @@ async function togglePolicy(
   const newState = !currentState;
 
   console.log(
-    `📊 Current state: ${currentState ? "🟢 ENABLED" : "🔴 DISABLED"}`
+    `📊 Current state: ${currentState ? "🟢 ENABLED" : "🔴 DISABLED"}`,
   );
   console.log(`🎯 Target state: ${newState ? "🟢 ENABLED" : "🔴 DISABLED"}`);
 
@@ -214,7 +214,7 @@ async function togglePolicy(
     console.log(
       `✅ Successfully toggled policy '${policy.name}' to ${
         newState ? "ENABLED" : "DISABLED"
-      }`
+      }`,
     );
 
     // Verify the change
@@ -227,7 +227,7 @@ async function togglePolicy(
       console.log("✅ Change verified successfully!");
     } else {
       console.log(
-        "⚠️  Could not verify change. Check manually in UniFi Controller."
+        "⚠️  Could not verify change. Check manually in UniFi Controller.",
       );
     }
   } catch (error: any) {
@@ -238,13 +238,13 @@ async function togglePolicy(
 async function setPolicy(
   policyManager: UniFi9PolicyManager,
   policyId: string,
-  enabled: boolean
+  enabled: boolean,
 ): Promise<void> {
   const action = enabled ? "enable" : "disable";
   console.log(
     `\n${enabled ? "🟢" : "🔴"} ${
       action.charAt(0).toUpperCase() + action.slice(1)
-    }ing policy ${policyId}...`
+    }ing policy ${policyId}...`,
   );
 
   // First get current state
@@ -264,13 +264,13 @@ async function setPolicy(
     console.log(
       `ℹ️  Policy '${policy.name}' is already ${
         enabled ? "ENABLED" : "DISABLED"
-      }`
+      }`,
     );
     return;
   }
 
   console.log(
-    `📊 Current state: ${currentState ? "🟢 ENABLED" : "🔴 DISABLED"}`
+    `📊 Current state: ${currentState ? "🟢 ENABLED" : "🔴 DISABLED"}`,
   );
   console.log(`🎯 Target state: ${enabled ? "🟢 ENABLED" : "🔴 DISABLED"}`);
 
@@ -288,7 +288,7 @@ async function setPolicy(
       console.log("✅ Change verified successfully!");
     } else {
       console.log(
-        "⚠️  Could not verify change. Check manually in UniFi Controller."
+        "⚠️  Could not verify change. Check manually in UniFi Controller.",
       );
     }
   } catch (error: any) {

@@ -33,7 +33,7 @@ export class ConfigUIService {
   constructor(private readonly log: Logger) {}
 
   async discoverRulesAndPolicies(
-    config: DiscoveryConfig
+    config: DiscoveryConfig,
   ): Promise<DiscoveryResult> {
     try {
       // Disable SSL certificate validation for self-signed certificates
@@ -101,7 +101,7 @@ export class ConfigUIService {
       } catch (error) {
         this.log.debug(
           "UniFi 9 policies not available:",
-          (error as Error).message
+          (error as Error).message,
         );
       }
 

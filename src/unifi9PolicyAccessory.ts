@@ -17,20 +17,20 @@ export class UniFi9PolicySwitch {
     private readonly policy: UniFi9FirewallPolicy,
     private readonly invert: boolean,
     private readonly controller: Controller,
-    private readonly site: Site
+    private readonly site: Site,
   ) {
     // Create policy manager
     this.policyManager = new UniFi9PolicyManager(this.controller, this.site);
 
     // set accessory information
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.accessory
       .getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, "Ubiquiti")
       .setCharacteristic(this.platform.Characteristic.Model, "UniFi-9-Policy")
       .setCharacteristic(
         this.platform.Characteristic.SerialNumber,
-        this.accessory.context.policy.name
+        this.accessory.context.policy.name,
       );
 
     this.service =
@@ -39,7 +39,7 @@ export class UniFi9PolicySwitch {
 
     this.service.setCharacteristic(
       this.platform.Characteristic.Name,
-      accessory.context.policy.name
+      accessory.context.policy.name,
     );
 
     this.service
@@ -58,12 +58,12 @@ export class UniFi9PolicySwitch {
       this.policy.enabled = targetEnabled;
 
       this.platform.log.debug(
-        `Set UniFi 9 Policy ${this.policy._id}: ${newValue} (Inverted? ${this.invert})`
+        `Set UniFi 9 Policy ${this.policy._id}: ${newValue} (Inverted? ${this.invert})`,
       );
     } catch (error) {
+      const message = (error as Error)?.message ?? String(error);
       this.platform.log.error(
-        `Failed to update UniFi 9 Policy ${this.policy._id}:`,
-        error
+        `Failed to update UniFi 9 Policy ${this.policy._id}: ${message}`,
       );
       throw error;
     }
@@ -73,7 +73,7 @@ export class UniFi9PolicySwitch {
     const isOn = this.invert ? !this.policy.enabled : this.policy.enabled;
 
     this.platform.log.debug(
-      `Is UniFi 9 Policy ${this.policy._id} on? ${isOn} (Inverted? ${this.invert})`
+      `Is UniFi 9 Policy ${this.policy._id} on? ${isOn} (Inverted? ${this.invert})`,
     );
 
     return isOn;

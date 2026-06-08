@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
@@ -30,15 +29,15 @@ async function discoverPolicies(): Promise<void> {
 
   if (!config.url || !config.username || !config.password) {
     console.log(
-      "Usage: node discover-policies.js <url> <username> <password> [site]"
+      "Usage: node discover-policies.js <url> <username> <password> [site]",
     );
     console.log(
-      "Or set environment variables: UNIFI_URL, UNIFI_USERNAME, UNIFI_PASSWORD, UNIFI_SITE"
+      "Or set environment variables: UNIFI_URL, UNIFI_USERNAME, UNIFI_PASSWORD, UNIFI_SITE",
     );
     console.log("");
     console.log("Example:");
     console.log(
-      "  node discover-policies.js https://192.168.1.1 admin password default"
+      "  node discover-policies.js https://192.168.1.1 admin password default",
     );
     process.exit(1);
   }
@@ -71,16 +70,16 @@ async function discoverPolicies(): Promise<void> {
         });
 
       useZoneFirewall = migrationResponse.data?.some(
-        (migration: any) => migration.feature === "ZONE_BASED_FIREWALL"
+        (migration: any) => migration.feature === "ZONE_BASED_FIREWALL",
       );
 
       console.log(
-        `Zone-based firewall: ${useZoneFirewall ? "✅ Enabled" : "❌ Disabled"}`
+        `Zone-based firewall: ${useZoneFirewall ? "✅ Enabled" : "❌ Disabled"}`,
       );
       console.log("");
     } catch (error: any) {
       console.log(
-        `Could not check zone-based firewall status: ${error.message}`
+        `Could not check zone-based firewall status: ${error.message}`,
       );
       console.log("");
     }
@@ -120,7 +119,7 @@ async function discoverPolicies(): Promise<void> {
           policies[0] !== undefined
         ) {
           console.log(
-            `✅ Found ${policies.length} policies at ${endpoint.url}:`
+            `✅ Found ${policies.length} policies at ${endpoint.url}:`,
           );
           console.log("");
 
@@ -131,7 +130,7 @@ async function discoverPolicies(): Promise<void> {
             console.log(
               `  Enabled: ${
                 policy.enabled !== undefined ? policy.enabled : "N/A"
-              }`
+              }`,
             );
             console.log(`  Type: ${policy.type || policy.action || "N/A"}`);
             console.log("  Raw data:", JSON.stringify(policy, null, 2));
@@ -145,13 +144,13 @@ async function discoverPolicies(): Promise<void> {
           console.log(`  📊 Endpoint ${endpoint.url} responded with data:`);
           console.log(
             "  Data structure:",
-            JSON.stringify(response.data, null, 2)
+            JSON.stringify(response.data, null, 2),
           );
 
           // Check if it's just an empty array
           if (Array.isArray(response.data) && response.data.length === 0) {
             console.log(
-              "  ✅ Endpoint exists but no policies found (empty array)"
+              "  ✅ Endpoint exists but no policies found (empty array)",
             );
           } else if (
             response.data.data &&
@@ -159,11 +158,11 @@ async function discoverPolicies(): Promise<void> {
             response.data.data.length === 0
           ) {
             console.log(
-              "  ✅ Endpoint exists but no policies found (empty data array)"
+              "  ✅ Endpoint exists but no policies found (empty data array)",
             );
           } else {
             console.log(
-              "  ⚠️  Endpoint exists but returned unexpected data structure"
+              "  ⚠️  Endpoint exists but returned unexpected data structure",
             );
           }
         } else {
@@ -201,14 +200,14 @@ async function discoverPolicies(): Promise<void> {
             console.log("");
           });
           console.log(
-            "💡 You can use these traditional firewall rules with the original configuration:"
+            "💡 You can use these traditional firewall rules with the original configuration:",
           );
           console.log('   "rules": [');
           fwRules.forEach((rule: any, index: number) => {
             console.log(`     {`);
             console.log(`       "id": "${rule.rule_index || rule._id}",`);
             console.log(
-              `       "name": "${rule.name || `Rule ${index + 1}`}",`
+              `       "name": "${rule.name || `Rule ${index + 1}`}",`,
             );
             console.log(`       "inverted": false`);
             console.log(`     }${index < fwRules.length - 1 ? "," : ""}`);
@@ -219,10 +218,10 @@ async function discoverPolicies(): Promise<void> {
           console.log("");
           console.log("This could mean:");
           console.log(
-            "- No firewall rules have been created in your UniFi Controller"
+            "- No firewall rules have been created in your UniFi Controller",
           );
           console.log(
-            "- The user account doesn't have permission to view firewall rules"
+            "- The user account doesn't have permission to view firewall rules",
           );
           console.log("- There might be a connection or API issue");
         }
